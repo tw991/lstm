@@ -62,12 +62,6 @@ end
 model = {}
 --local paramx, paramdx
 
-function table_invert(t)
-  local u = {}
-  for k,v in pairs(t) do u[v] = k end
-  return u
-end
-
 function lstm(i, prev_c, prev_h)
   local function new_input_sum()
     local i2h            = nn.Linear(params.rnn_size, params.rnn_size)
@@ -108,7 +102,7 @@ function create_network()
   local pred             = nn.LogSoftMax()(h2y(dropped))
   local err              = nn.ClassNLLCriterion()({pred, y})
   local module           = nn.gModule({x, y, prev_s},
-                                      {err, nn.Identity()(next_s), pred})
+                                      {err, nn.Identity()(next_s)})
   module:getParameters():uniform(-params.init_weight, params.init_weight)
   return transfer_data(module)
 end
@@ -134,8 +128,6 @@ function setup()
   model.rnns = g_cloneManyTimes(core_network, params.seq_length)
   model.norm_dw = 0
   model.err = transfer_data(torch.zeros(params.seq_length))
-  --create space storing prediction
-  model.pred = transfer_data(torch.zeros(param.vocab_size))
 end
 
 function reset_state(state)
@@ -162,7 +154,7 @@ function fp(state)
     local x = state.data[state.pos]
     local y = state.data[state.pos + 1]
     local s = model.s[i - 1]
-    model.err[i], model.s[i],_ = unpack(model.rnns[i]:forward({x, y, s}))
+    model.err[i], model.s[i] = unpack(model.rnns[i]:forward({x, y, s}))
     state.pos = state.pos + 1
   end
   g_replace_table(model.start_s, model.s[params.seq_length])
@@ -214,7 +206,7 @@ function run_test()
     local x = state_test.data[i]
     local y = state_test.data[i + 1]
     local s = model.s[i - 1]
-    perp_tmp, model.s[1],_ = unpack(model.rnns[1]:forward({x, y, model.s[0]}))
+    perp_tmp, model.s[1] = unpack(model.rnns[1]:forward({x, y, model.s[0]}))
     perp = perp + perp_tmp[1]
     g_replace_table(model.s[0], model.s[1])
   end
@@ -223,59 +215,57 @@ function run_test()
 end
 
 --function main()
-function main()
-  g_init_gpu(arg)
-  state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
-  state_valid =  {data=transfer_data(ptb.validdataset(params.batch_size))}
-  state_test =  {data=transfer_data(ptb.testdataset(params.batch_size))}
-  print("Network parameters:")
-  print(params)
-  local states = {state_train, state_valid, state_test}
-  for _, state in pairs(states) do
-   reset_state(state)
-  end
-  setup()
-  step = 0
-  epoch = 0
-  total_cases = 0
-  beginning_time = torch.tic()
-  start_time = torch.tic()
-  print("Starting training.")
-  words_per_step = params.seq_length * params.batch_size
-  epoch_size = torch.floor(state_train.data:size(1) / params.seq_length)
-  --perps
-  while epoch < params.max_max_epoch do
-   perp = fp(state_train)
-   if perps == nil then
-     perps = torch.zeros(epoch_size):add(perp)
-   end
-   perps[step % epoch_size + 1] = perp
-   step = step + 1
-   bp(state_train)
-   total_cases = total_cases + params.seq_length * params.batch_size
-   epoch = step / epoch_size
-   if step % torch.round(epoch_size / 10) == 10 then
-     wps = torch.floor(total_cases / torch.toc(start_time))
-     since_beginning = g_d(torch.toc(beginning_time) / 60)
-     print('epoch = ' .. g_f3(epoch) ..
-           ', train perp. = ' .. g_f3(torch.exp(perps:mean())) ..
-           ', wps = ' .. wps ..
-           ', dw:norm() = ' .. g_f3(model.norm_dw) ..
-           ', lr = ' ..  g_f3(params.lr) ..
-           ', since beginning = ' .. since_beginning .. ' mins.')
-   end
-   if step % epoch_size == 0 then
-     run_valid()
-     if epoch > params.max_epoch then
-         params.lr = params.lr / params.decay
-     end
-   end
-   if step % 33 == 0 then
-     cutorch.synchronize()
-     collectgarbage()
-   end
-  end
-  run_test()
-  print("Training is over.")
+g_init_gpu(arg)
+state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
+state_valid =  {data=transfer_data(ptb.validdataset(params.batch_size))}
+state_test =  {data=transfer_data(ptb.testdataset(params.batch_size))}
+print("Network parameters:")
+print(params)
+local states = {state_train, state_valid, state_test}
+for _, state in pairs(states) do
+ reset_state(state)
 end
-  --end
+setup()
+step = 0
+epoch = 0
+total_cases = 0
+beginning_time = torch.tic()
+start_time = torch.tic()
+print("Starting training.")
+words_per_step = params.seq_length * params.batch_size
+epoch_size = torch.floor(state_train.data:size(1) / params.seq_length)
+--perps
+while epoch < params.max_max_epoch do
+ perp = fp(state_train)
+ if perps == nil then
+   perps = torch.zeros(epoch_size):add(perp)
+ end
+ perps[step % epoch_size + 1] = perp
+ step = step + 1
+ bp(state_train)
+ total_cases = total_cases + params.seq_length * params.batch_size
+ epoch = step / epoch_size
+ if step % torch.round(epoch_size / 10) == 10 then
+   wps = torch.floor(total_cases / torch.toc(start_time))
+   since_beginning = g_d(torch.toc(beginning_time) / 60)
+   print('epoch = ' .. g_f3(epoch) ..
+         ', train perp. = ' .. g_f3(torch.exp(perps:mean())) ..
+         ', wps = ' .. wps ..
+         ', dw:norm() = ' .. g_f3(model.norm_dw) ..
+         ', lr = ' ..  g_f3(params.lr) ..
+         ', since beginning = ' .. since_beginning .. ' mins.')
+ end
+ if step % epoch_size == 0 then
+   run_valid()
+   if epoch > params.max_epoch then
+       params.lr = params.lr / params.decay
+   end
+ end
+ if step % 33 == 0 then
+   cutorch.synchronize()
+   collectgarbage()
+ end
+end
+run_test()
+print("Training is over.")
+--end
