@@ -108,7 +108,7 @@ function create_network()
   local pred             = nn.LogSoftMax()(h2y(dropped))
   local err              = nn.ClassNLLCriterion()({pred, y})
   local module           = nn.gModule({x, y, prev_s},
-                                      {err, nn.Identity()(next_s), pred})
+                                      {err, nn.Identity()(next_s), nn.Identity()(pred)})
   module:getParameters():uniform(-params.init_weight, params.init_weight)
   return transfer_data(module)
 end
