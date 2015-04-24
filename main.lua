@@ -135,7 +135,7 @@ function setup()
   model.norm_dw = 0
   model.err = transfer_data(torch.zeros(params.seq_length))
   --create space storing prediction
-  model.pred = transfer_data(torch.zeros(param.vocab_size))
+  model.pred = transfer_data(torch.zeros(params.vocab_size))
 end
 
 function reset_state(state)
@@ -279,3 +279,4 @@ function main()
   print("Training is over.")
 end
   --end
+main()
