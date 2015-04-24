@@ -120,8 +120,10 @@ function setup()
   model.s = {}
   model.ds = {}
   model.start_s = {}
+  model.pred = {}
   for j = 0, params.seq_length do
     model.s[j] = {}
+    model.pred[j] = transfer_data(torch.zeros(params.batch_size, params.vocab_size))
     for d = 1, 2 * params.layers do
       model.s[j][d] = transfer_data(torch.zeros(params.batch_size, params.rnn_size))
     end
@@ -135,7 +137,6 @@ function setup()
   model.norm_dw = 0
   model.err = transfer_data(torch.zeros(params.seq_length))
   --create space storing prediction
-  model.pred = transfer_data(torch.zeros(params.vocab_size))
 end
 
 function reset_state(state)
@@ -162,7 +163,7 @@ function fp(state)
     local x = state.data[state.pos]
     local y = state.data[state.pos + 1]
     local s = model.s[i - 1]
-    model.err[i], model.s[i],_ = unpack(model.rnns[i]:forward({x, y, s}))
+    model.err[i], model.s[i],model.pred[i] = unpack(model.rnns[i]:forward({x, y, s}))
     state.pos = state.pos + 1
   end
   g_replace_table(model.start_s, model.s[params.seq_length])
@@ -179,7 +180,7 @@ function bp(state)
     local s = model.s[i - 1]
     local derr = transfer_data(torch.ones(1))
     local tmp = model.rnns[i]:backward({x, y, s},
-                                       {derr, model.ds})[3]
+                                       {derr, model.ds, model.pred})[3]
     g_replace_table(model.ds, tmp)
     cutorch.synchronize()
   end
