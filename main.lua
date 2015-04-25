@@ -222,10 +222,7 @@ end
 
 local function query_sentences()
   g_init_gpu(arg)
-  model = torch.load('/home/user1/a4/lstm/model.net')
   state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
-  g_disable_dropout(model.rnns)
-  g_replace_table(model.s[0], model.start_s)
   -- query_len = 10
   -- query_words = {'new','york'}
   query_len, query_words = comm.getinput()
@@ -233,8 +230,11 @@ local function query_sentences()
   rev_dict = ptb.table_invert(ptb.vocab_map)
   temp = comm.input_to_dict(query_words)
   temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size) --batch_size
+  model = torch.load('/home/user1/a4/lstm/model.net')
   state_query = {data=transfer_data(temp)}
   reset_state(state_query)
+  g_disable_dropout(model.rnns)
+  g_replace_table(model.s[0], model.start_s)
   if query_len <= #query_words then 
     print(table.concat(query_words, " "))
   else
