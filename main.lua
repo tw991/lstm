@@ -11,6 +11,7 @@ if not ok then
     if ok then
         print("warning: fbcunn not found. Falling back to cunn") 
         LookupTable = nn.LookupTable
+        cutorch.getDevice(1)
     else
         print("Could not find cunn or fbcunn. Either is required")
         os.exit()
@@ -280,6 +281,8 @@ function main()
    end
   end
   run_test()
+  print("Saving model")
+  torch.save('home/user1/a4/lstm/model.net', model)
   print("Training is over.")
 end
   --end
