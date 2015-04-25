@@ -29,8 +29,8 @@ local function getinput()
     end
   else
     local len = line[1]
-    local words = table.remove(line, 1)
-    return len, words
+    local table.remove(line, 1)
+    return len, line
   end
 end
 
