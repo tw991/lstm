@@ -43,7 +43,7 @@ local params = {batch_size=20,
                ]]--
 
 -- Trains 1h and gives test 115 perplexity.
-local params = {batch_size=300,
+params = {batch_size=300,
                 seq_length=20,
                 layers=2,
                 decay=2,
@@ -230,7 +230,6 @@ local function query_sentences()
   -- local words = {'new','york'}
   local len, words = comm.getinput()
   local rev_dict = ptb.table_invert(ptb.vocab_map)
-  local out_words = {}
   local temp = comm.input_to_dict(words)
   temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size) --batch_size
   state_query = {data=transfer_data(temp)}
