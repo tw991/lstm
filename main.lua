@@ -11,7 +11,6 @@ if not ok then
     if ok then
         print("warning: fbcunn not found. Falling back to cunn") 
         LookupTable = nn.LookupTable
-        cutorch.getDevice(1)
     else
         print("Could not find cunn or fbcunn. Either is required")
         os.exit()
@@ -24,7 +23,7 @@ end
 require('nngraph')
 require('base')
 ptb = require('data')
-readin = require('a4_communication_loop')
+arg = {2}
 
 -- Train 1 day and gives 82 perplexity.
 --[[
