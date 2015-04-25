@@ -45,7 +45,8 @@ function input_to_dict(data)
 end
 
 
-return{getinput=getinput}
+return{getinput=getinput,
+      input_to_dict=input_to_dict}
 
 
 
