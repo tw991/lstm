@@ -221,16 +221,20 @@ end
 
 
 local function query_sentences()
+  g_init_gpu(arg)
   model = torch.load('/home/user1/a4/lstm/model.net')
+  state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
   g_disable_dropout(model.rnns)
   g_replace_table(model.s[0], model.start_s)
+  -- local len = 10
+  -- local words = {'new','york'}
   local len, words = comm.getinput()
   local rev_dict = ptb.table_invert(ptb.vocab_map)
   local out_words = {}
   local temp = comm.input_to_dict(words)
   temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size) --batch_size
   state_query = {data=transfer_data(temp)}
-  if len >= #words then 
+  if len <= #words then 
     print(table.concat(words, " "))
   else
     for i =1, (len-1) do
@@ -244,8 +248,11 @@ local function query_sentences()
       _, model.s[1], query_pred = unpack(model.rnns[1]:forward({x, y, model.s[0]}))
       g_replace_table(model.s[0], model.s[1])
       if (i+1) > #words then
-        local _,max_index = torch.max(query_pred)
+        local _,max_index = torch.max(query_pred[1],1)
         table.insert(words, rev_dict[max_index[1]])
+        temp = comm.input_to_dict(words)
+        temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size)
+        state_query = {data=transfer_data(temp)}
       end
     end
     print(table.concat(words, " "))
@@ -311,4 +318,5 @@ function main()
   print("Training is over.")
 end
   --end
-main()
+
+query_sentences()
