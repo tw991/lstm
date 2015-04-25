@@ -23,7 +23,7 @@ end
 require('nngraph')
 require('base')
 ptb = require('data')
-arg = {2}
+arg = {3}
 
 -- Train 1 day and gives 82 perplexity.
 --[[
