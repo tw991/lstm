@@ -51,6 +51,12 @@ local function load_data(fname)
    return x
 end
 
+local function table_invert(t)
+  local u = {}
+  for k,v in pairs(t) do u[v] = k end
+  return u
+end
+
 local function traindataset(batch_size, char)
    local x = load_data(trainfn)
    x = replicate(x, batch_size)
@@ -76,4 +82,5 @@ end
 return {traindataset=traindataset,
         testdataset=testdataset,
         validdataset=validdataset,
-        vocab_map=vocab_map}
+        vocab_map=vocab_map,
+        table_invert=table_invert}

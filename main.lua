@@ -23,6 +23,7 @@ end
 require('nngraph')
 require('base')
 ptb = require('data')
+readin = require('a4_communication_loop')
 
 -- Train 1 day and gives 82 perplexity.
 --[[
@@ -34,7 +35,7 @@ local params = {batch_size=20,
                 dropout=0.65,
                 init_weight=0.04,
                 lr=1,
-                vocab_size=10000,
+                size=10000,
                 max_epoch=14,
                 max_max_epoch=55,
                 max_grad_norm=10}
@@ -61,12 +62,6 @@ end
 --local state_train, state_valid, state_test
 model = {}
 --local paramx, paramdx
-
-function table_invert(t)
-  local u = {}
-  for k,v in pairs(t) do u[v] = k end
-  return u
-end
 
 function lstm(i, prev_c, prev_h)
   local function new_input_sum()
@@ -221,6 +216,14 @@ function run_test()
   end
   print("Test set perplexity : " .. g_f3(torch.exp(perp / (len - 1))))
   g_enable_dropout(model.rnns)
+end
+
+
+function query()
+  g_init_gpu(arg)
+  state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
+  state_valid =  {data=transfer_data(ptb.validdataset(params.batch_size))}
+  model = torch.load('/home/user1/a4/model.net')
 end
 
 --function main()
