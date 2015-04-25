@@ -226,9 +226,10 @@ local function query_sentences()
   state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
   g_disable_dropout(model.rnns)
   g_replace_table(model.s[0], model.start_s)
-  query_len = 10
-  query_words = {'new','york'}
-  --query_len, query_words = comm.getinput()
+  -- query_len = 10
+  -- query_words = {'new','york'}
+  query_len, query_words = comm.getinput()
+  query_len = tonumber(query_len)
   rev_dict = ptb.table_invert(ptb.vocab_map)
   temp = comm.input_to_dict(query_words)
   temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size) --batch_size
