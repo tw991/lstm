@@ -224,6 +224,7 @@ local function query_sentences()
   g_init_gpu(arg)
   model = torch.load('/home/user1/a4/lstm/model.net')
   state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
+  reset_state(state_train)
   g_disable_dropout(model.rnns)
   g_replace_table(model.s[0], model.start_s)
   -- query_len = 10
