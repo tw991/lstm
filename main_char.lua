@@ -197,7 +197,7 @@ function run_valid()
   for i = 1, len do
     perp = perp + fp(state_valid)
   end
-  print("Validation set perplexity : " .. g_f3(torch.exp(perp / len)))
+  print("Validation set perplexity : " .. g_f3(torch.exp(5.6*perp / len)))
   g_enable_dropout(model.rnns)
 end
 
@@ -296,7 +296,7 @@ function main()
      wps = torch.floor(total_cases / torch.toc(start_time))
      since_beginning = g_d(torch.toc(beginning_time) / 60)
      print('epoch = ' .. g_f3(epoch) ..
-           ', train perp. = ' .. g_f3(torch.exp(perps:mean())) ..
+           ', train perp. = ' .. g_f3(torch.exp(5.6*perps:mean())) ..
            ', wps = ' .. wps ..
            ', dw:norm() = ' .. g_f3(model.norm_dw) ..
            ', lr = ' ..  g_f3(params.lr) ..
