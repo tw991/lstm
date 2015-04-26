@@ -314,7 +314,7 @@ function main()
    end
   end
   print("Saving model")
-  torch.save('home/user1/a4/lstm/model.net', model)
+  torch.save('home/user1/a4/lstm/model_char.net', model)
   print("Training is over.")
 end
   --end
