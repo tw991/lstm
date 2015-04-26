@@ -77,7 +77,8 @@ end
 
 return{getinput=getinput,
       input_to_dict=input_to_dict,
-      readline_submission=readline_submission}
+      readline_submission=readline_submission,
+      getinput_submission=getinput_submission}
 
 
 
