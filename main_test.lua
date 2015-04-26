@@ -214,7 +214,7 @@ function run_test()
     perp = perp + perp_tmp[1]
     g_replace_table(model.s[0], model.s[1])
   end
-  print("Test set perplexity : " .. g_f3(torch.exp(perp / (len - 1))))
+  print("Test set perplexity : " .. g_f3(torch.exp(5.6 * perp / (len - 1))))
   g_enable_dropout(model.rnns)
 end
 
@@ -273,7 +273,7 @@ function main()
   end
   run_test()
   print("Saving model")
-  torch.save('home/user1/a4/lstm/model.net', model)
+  torch.save('home/user1/a4/lstm/model_char.net', model)
   print("Training is over.")
 end
   --end
