@@ -22,7 +22,7 @@ else
 end
 require('nngraph')
 require('base')
-ptb = require('data')
+ptb = require('data_char')
 comm = require('a4_communication_loop')
 arg = {3}
 
@@ -43,15 +43,15 @@ local params = {batch_size=20,
                ]]--
 
 -- Trains 1h and gives test 115 perplexity.
-params = {batch_size=300,
-                seq_length=20,
+params = {batch_size=200,
+                seq_length=50,
                 layers=2,
                 decay=2,
                 rnn_size=200,
                 dropout=0,
                 init_weight=0.1,
                 lr=1,
-                vocab_size=10000,
+                vocab_size=50,
                 max_epoch=4,
                 max_max_epoch=13,
                 max_grad_norm=5}
@@ -197,7 +197,7 @@ function run_valid()
   for i = 1, len do
     perp = perp + fp(state_valid)
   end
-  print("Validation set perplexity : " .. g_f3(torch.exp(perp / len)))
+  print("Validation set perplexity : " .. g_f3(torch.exp(5.6*perp / len)))
   g_enable_dropout(model.rnns)
 end
 
@@ -296,7 +296,7 @@ function main()
      wps = torch.floor(total_cases / torch.toc(start_time))
      since_beginning = g_d(torch.toc(beginning_time) / 60)
      print('epoch = ' .. g_f3(epoch) ..
-           ', train perp. = ' .. g_f3(torch.exp(perps:mean())) ..
+           ', train perp. = ' .. g_f3(torch.exp(5.6 * perps:mean())) ..
            ', wps = ' .. wps ..
            ', dw:norm() = ' .. g_f3(model.norm_dw) ..
            ', lr = ' ..  g_f3(params.lr) ..
