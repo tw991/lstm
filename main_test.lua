@@ -264,11 +264,10 @@ end
 function main()
   g_init_gpu(arg)
   state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
-  state_valid =  {data=transfer_data(ptb.validdataset(params.batch_size))}
-  state_test =  {data=transfer_data(ptb.testdataset(params.batch_size))}
+  state_valid = {data=transfer_data(ptb.validdataset(params.batch_size))}
   print("Network parameters:")
   print(params)
-  local states = {state_train, state_valid, state_test}
+  local states = {state_train, state_valid}
   for _, state in pairs(states) do
    reset_state(state)
   end
