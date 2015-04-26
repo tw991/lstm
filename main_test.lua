@@ -23,7 +23,6 @@ end
 require('nngraph')
 require('base')
 ptb = require('data_char')
-comm = require('a4_communication_loop')
 arg = {3}
 
 -- Train 1 day and gives 82 perplexity.
@@ -219,46 +218,6 @@ function run_test()
   g_enable_dropout(model.rnns)
 end
 
-
-local function query_sentences()
-  g_init_gpu(arg)
-  state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
-  -- query_len = 10
-  -- query_words = {'new','york'}
-  query_len, query_words = comm.getinput()
-  query_len = tonumber(query_len)
-  rev_dict = ptb.table_invert(ptb.vocab_map)
-  temp = comm.input_to_dict(query_words)
-  temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size) --batch_size
-  model = torch.load('/home/user1/a4/lstm/model.net')
-  state_query = {data=transfer_data(temp)}
-  reset_state(state_query)
-  g_disable_dropout(model.rnns)
-  g_replace_table(model.s[0], model.start_s)
-  if query_len <= #query_words then 
-    print(table.concat(query_words, " "))
-  else
-    for i =1, (query_len-1) do
-      if i<#query_words then
-        y = state_query.data[i+1]
-      else
-        y = state_query.data[#query_words]
-      end
-      x = state_query.data[i]
-      s = model.s[i - 1]
-      _, model.s[1], query_pred = unpack(model.rnns[1]:forward({x, y, model.s[0]}))
-      g_replace_table(model.s[0], model.s[1])
-      if (i+1) > #query_words then
-        local _,max_index = torch.max(query_pred[1],1)
-        table.insert(query_words, rev_dict[max_index[1]])
-        temp = comm.input_to_dict(query_words)
-        temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size)
-        state_query = {data=transfer_data(temp)}
-      end
-    end
-    print(table.concat(query_words, " "))
-  end
-end
 
 --function main()
 function main()
