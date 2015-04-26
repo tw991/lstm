@@ -61,7 +61,7 @@ function getinput_submission()
         print("Failed, try again")
       end
     else
-      return len, line
+      return line
     end
   end
 end
@@ -77,7 +77,7 @@ end
 
 return{getinput=getinput,
       input_to_dict=input_to_dict,
-      getinput_submission=getinput_submission}
+      readline_submission=readline_submission}
 
 
 

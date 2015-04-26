@@ -265,8 +265,9 @@ function submission()
   state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
   model = torch.load('/home/user1/a4/lstm/model_char.net')
   rev_dict = ptb.table_invert(ptb.vocab_map)
+  print("OK GO")
   while true do
-    query_words = comm.getinput_submission()
+    query_words = comm.readline_submission()
     temp = comm.input_to_dict(query_words)
     temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size)
     state_query = {data=transfer_data(temp)}
@@ -280,7 +281,6 @@ function submission()
     print(table.concat(pred_sub, " "))
   end
 end
-
 --function main()
 function main()
   g_init_gpu(arg)
