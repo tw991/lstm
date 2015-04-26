@@ -23,7 +23,7 @@ end
 require('nngraph')
 require('base')
 ptb = require('data_char')
-comm = require('a4_communication_loop')
+comm = require('a4_communication_loop_char')
 arg = {3}
 
 -- Train 1 day and gives 82 perplexity.
@@ -319,4 +319,4 @@ end
   --end
 
 --query_sentences()
-main()
+--main()
