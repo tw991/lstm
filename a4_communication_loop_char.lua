@@ -48,7 +48,7 @@ end
 
 function getinput_submission()
   while true do
-    local ok, line = pcall(readline)
+    local ok, line = pcall(readline_submission)
     if not ok then
       if line.code == "EOF" then
         break -- end loop
