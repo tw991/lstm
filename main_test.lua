@@ -23,26 +23,24 @@ end
 require('nngraph')
 require('base')
 ptb = require('data_char')
-arg = {3}
+arg = {4}
 
 -- Train 1 day and gives 82 perplexity.
---[[
-local params = {batch_size=20,
-                seq_length=35,
+params = {batch_size=100,
+                seq_length=50,
                 layers=2,
                 decay=1.15,
                 rnn_size=1500,
                 dropout=0.65,
                 init_weight=0.04,
                 lr=1,
-                size=10000,
+                vocab_size=50,
                 max_epoch=14,
                 max_max_epoch=55,
                 max_grad_norm=10}
-               ]]--
-
 -- Trains 1h and gives test 115 perplexity.
-params = {batch_size=100,
+--[[
+params = {batch_size=300,
                 seq_length=50,
                 layers=2,
                 decay=2,
@@ -54,7 +52,7 @@ params = {batch_size=100,
                 max_epoch=4,
                 max_max_epoch=13,
                 max_grad_norm=5}
-
+]]--
 function transfer_data(x)
   return x:cuda()
 end
@@ -271,9 +269,8 @@ function main()
      collectgarbage()
    end
   end
-  run_test()
   print("Saving model")
-  torch.save('home/user1/a4/lstm/model_char.net', model)
+  torch.save('/home/user1/a4/lstm/model_char_large_1d.net', model)
   print("Training is over.")
 end
   --end
