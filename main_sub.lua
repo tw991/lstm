@@ -230,7 +230,7 @@ function query_sentences()
   rev_dict = ptb.table_invert(ptb.vocab_map)
   temp = comm.input_to_dict(query_words)
   temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size) --batch_size
-  model = torch.load('/home/user1/a4/lstm/model.net')
+  model = torch.load('/home/user1/a4/lstm/model_char.net')
   state_query = {data=transfer_data(temp)}
   reset_state(state_query)
   g_disable_dropout(model.rnns)
@@ -257,6 +257,27 @@ function query_sentences()
       end
     end
     print(table.concat(query_words, " "))
+  end
+end
+
+function submission()
+  g_init_gpu(arg)
+  state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
+  model = torch.load('/home/user1/a4/lstm/model_char.net')
+  rev_dict = ptb.table_invert(ptb.vocab_map)
+  while true do
+    query_words = comm.getinput_submission()
+    temp = comm.input_to_dict(query_words)
+    temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size)
+    state_query = {data=transfer_data(temp)}
+    reset_state(state_query)
+    g_disable_dropout(model.rnns)
+    g_replace_table(model.s[0], model.start_s)
+    x = state_query.data[1]
+    y = state_query.data[1]
+    _, _, query_pred = unpack(model.rnns[1]:forward({x, y, model.s[0]}))
+    pred_sub = torch.totable(query_pred[1]:float())
+    print(table.concat(pred_sub, " "))
   end
 end
 

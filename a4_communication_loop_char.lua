@@ -36,6 +36,36 @@ function getinput()
   end
 end
 
+function readline_submission()
+  local line = io.read("*line")
+  if line == nil then error({code="EOF"}) end
+  line = stringx.split(line)
+  for i = 2,#line do
+    if ptb.vocab_map[line[i]] ==nil then error({code="vocab", word = line[i]}) end
+  end
+  return line
+end
+
+function getinput_submission()
+  while true do
+    local ok, line = pcall(readline)
+    if not ok then
+      if line.code == "EOF" then
+        break -- end loop
+      elseif line.code == "vocab" then
+        print("Word not in vocabulary")
+      elseif line.code == "init" then
+        print("Start with a number")
+      else
+        print(line)
+        print("Failed, try again")
+      end
+    else
+      return len, line
+    end
+  end
+end
+
 function input_to_dict(data)
   local x = torch.zeros(#data)
   for i = 1, #data do
@@ -46,7 +76,8 @@ end
 
 
 return{getinput=getinput,
-      input_to_dict=input_to_dict}
+      input_to_dict=input_to_dict,
+      getinput_submission=getinput_submission}
 
 
 
