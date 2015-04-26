@@ -268,7 +268,6 @@ function submission()
   print("OK GO")
   while true do
     query_words = comm.getinput_submission()
-    print(query_words)
     temp = comm.input_to_dict(query_words)
     temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size)
     state_query = {data=transfer_data(temp)}
