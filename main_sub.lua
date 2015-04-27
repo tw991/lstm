@@ -24,7 +24,7 @@ require('nngraph')
 require('base')
 ptb = require('data_char')
 comm = require('a4_communication_loop_char')
-arg = {3}
+arg_gpu = {3}
 
 -- Train 1 day and gives 82 perplexity.
 --[[]
@@ -221,7 +221,7 @@ end
 
 
 function query_sentences()
-  g_init_gpu(arg)
+  g_init_gpu(arg_gpu)
   state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
   -- query_len = 10
   -- query_words = {'new','york'}
@@ -261,7 +261,7 @@ function query_sentences()
 end
 
 function submission()
-  g_init_gpu(arg)
+  g_init_gpu(arg_gpu)
   state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
   model = torch.load('/home/user1/a4/lstm/model_char.net')
   rev_dict = ptb.table_invert(ptb.vocab_map)
@@ -286,7 +286,7 @@ function submission()
 end
 --function main()
 function main()
-  g_init_gpu(arg)
+  g_init_gpu(arg_gpu)
   state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
   state_valid = {data=transfer_data(ptb.validdataset(params.batch_size))}
   print("Network parameters:")
@@ -337,7 +337,7 @@ function main()
    end
   end
   print("Saving model")
-  torch.save('/home/user1/a4/lstm/model_char_large_1d.net', model)
+  torch.save('/home/user1/a4/lstm/model_char_20.net', model)
   print("Training is over.")
 end
   --end
@@ -345,8 +345,7 @@ end
 if not opt then
    cmd = torch.CmdLine()
    cmd:option('-mode', 'evaluate', 'mode: train | query | evaluate')
-   cmd:text()
-   opt = cmd:parse({})
+   opt = cmd:parse(arg or {})
 end
 
 if opt.mode == 'evaluate' then
