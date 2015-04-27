@@ -10,3 +10,7 @@ h2 = nn.CMulTable()({x2,h1})
 add = nn.CAddTable()({x1, h2})
 m = nn.gModule({x1, x2, x3}, {add})
 
+x1 = torch.ones(10)
+x2 = torch.ones(10)
+x3 = torch.ones(10)
+m:forward({x1, x2, x3})
