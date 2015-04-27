@@ -266,6 +266,7 @@ function submission()
   model = torch.load('/home/user1/a4/lstm/model_char.net')
   rev_dict = ptb.table_invert(ptb.vocab_map)
   print("OK GO")
+  io.flush()
   while true do
     query_words = comm.getinput_submission()
     temp = comm.input_to_dict(query_words)
@@ -279,6 +280,7 @@ function submission()
     _, _, query_pred = unpack(model.rnns[1]:forward({x, y, model.s[0]}))
     pred_sub = torch.totable(query_pred[1]:float())
     print(table.concat(pred_sub, " "))
+    io.flush()
   end
 end
 --function main()
@@ -338,6 +340,6 @@ function main()
   print("Training is over.")
 end
   --end
-
+submission()
 --query_sentences()
 --main()
