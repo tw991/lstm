@@ -340,6 +340,18 @@ function main()
   print("Training is over.")
 end
   --end
-submission()
---query_sentences()
---main()
+
+if not opt then
+   cmd = torch.CmdLine()
+   cmd:option('-mode', 'evaluate', 'mode: train | query | evaluate')
+   cmd:text()
+   opt = cmd:parse(arg or {})
+end
+
+if opt.mode == 'evaluate' then
+  submission()
+elseif opt.mode == 'train' then
+  main()
+elseif opt.mode == 'query' then
+  query_sentences()
+end
