@@ -109,7 +109,7 @@ end
 
 function setup()
   print("Creating a RNN LSTM network.")
-  local core_network = torch.load('/home/tw991/a4/lstm/core.net')
+  local core_network = torch.load('/scratch/tw991/a4/lstm/core.net')
   paramx, paramdx = core_network:getParameters()
   model.s = {}
   model.ds = {}
