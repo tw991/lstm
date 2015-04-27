@@ -110,6 +110,7 @@ end
 function setup()
   print("Creating a RNN LSTM network.")
   local core_network = torch.load('/scratch/tw991/a4/lstm/core.net')
+  -- load model.core_network
   paramx, paramdx = core_network:getParameters()
   model.s = {}
   model.ds = {}
@@ -221,8 +222,7 @@ end
 function query_sentences()
   g_init_gpu(arg_gpu)
   state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
-  -- query_len = 10
-  -- query_words = {'new','york'}
+  -- take training set to create vocab_dict
   model = {}
   setup()
   while true do 
@@ -235,7 +235,7 @@ function query_sentences()
     state_query = {data=transfer_data(temp)}
     reset_state(state_query)
     g_disable_dropout(model.rnns)
-    g_replace_table(model.s[0], model.start_s)
+    g_replace_table(model.s[0], model.start_s) --initialize memory unit
     if query_len <= #query_words then 
       print(table.concat(query_words, " "))
     else
@@ -248,8 +248,8 @@ function query_sentences()
         x = state_query.data[i]
         s = model.s[i - 1]
         _, model.s[1], query_pred = unpack(model.rnns[1]:forward({x, y, model.s[0]}))
-        g_replace_table(model.s[0], model.s[1])
-        if (i+1) > #query_words then
+        g_replace_table(model.s[0], model.s[1]) --update memory unit
+        if (i+1) > #query_words then --insert predicted word
           local _,max_index = torch.max(query_pred[1],1)
           table.insert(query_words, rev_dict[max_index[1]])
           temp = comm.input_to_dict(query_words)
