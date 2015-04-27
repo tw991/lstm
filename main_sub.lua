@@ -345,7 +345,7 @@ if not opt then
    cmd = torch.CmdLine()
    cmd:option('-mode', 'evaluate', 'mode: train | query | evaluate')
    cmd:text()
-   opt = cmd:parse(arg or {})
+   opt = cmd:parse({})
 end
 
 if opt.mode == 'evaluate' then
