@@ -39,6 +39,7 @@ end
 function readline_submission()
   local line = io.read("*line")
   if line == nil then error({code="EOF"}) end
+  line = line:lower()
   line = stringx.split(line)
   for i = 1,#line do
     if ptb.vocab_map[line[i]] ==nil then error({code="vocab", word = line[i]}) end

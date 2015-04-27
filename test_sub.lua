@@ -39,21 +39,22 @@ params = {batch_size=100,
                 max_epoch=14,
                 max_max_epoch=55,
                 max_grad_norm=10}
+
 -- Trains 1h and gives test 115 perplexity.
 --[[
-params = {batch_size=100,
+params = {batch_size=300,
                 seq_length=50,
                 layers=2,
-                decay=1.15,
-                rnn_size=500,
+                decay=2,
+                rnn_size=200,
                 dropout=0,
                 init_weight=0.1,
                 lr=1,
                 vocab_size=50,
                 max_epoch=4,
-                max_max_epoch=20,
+                max_max_epoch=13,
                 max_grad_norm=5}
---]]
+]]--
 function transfer_data(x)
   return x:cuda()
 end
@@ -109,7 +110,7 @@ end
 
 function setup()
   print("Creating a RNN LSTM network.")
-  local core_network = torch.load('/scratch/tw991/a4/lstm/core.net')
+  local core_network = create_network()
   paramx, paramdx = core_network:getParameters()
   model.s = {}
   model.ds = {}
@@ -223,54 +224,48 @@ function query_sentences()
   state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
   -- query_len = 10
   -- query_words = {'new','york'}
-  model = {}
-  setup()
-  while true do 
-    query_len, query_words = comm.getinput()
-    if #query_words == 0 then break end
-    query_len = tonumber(query_len)
-    rev_dict = ptb.table_invert(ptb.vocab_map)
-    temp = comm.input_to_dict(query_words)
-    temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size) --batch_size
-    state_query = {data=transfer_data(temp)}
-    reset_state(state_query)
-    g_disable_dropout(model.rnns)
-    g_replace_table(model.s[0], model.start_s)
-    if query_len <= #query_words then 
-      print(table.concat(query_words, " "))
-    else
-      for i =1, (query_len-1) do
-        if i<#query_words then
-          y = state_query.data[i+1]
-        else
-          y = state_query.data[#query_words]
-        end
-        x = state_query.data[i]
-        s = model.s[i - 1]
-        _, model.s[1], query_pred = unpack(model.rnns[1]:forward({x, y, model.s[0]}))
-        g_replace_table(model.s[0], model.s[1])
-        if (i+1) > #query_words then
-          local _,max_index = torch.max(query_pred[1],1)
-          table.insert(query_words, rev_dict[max_index[1]])
-          temp = comm.input_to_dict(query_words)
-          temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size)
-          state_query = {data=transfer_data(temp)}
-        end
+  query_len, query_words = comm.getinput()
+  query_len = tonumber(query_len)
+  rev_dict = ptb.table_invert(ptb.vocab_map)
+  temp = comm.input_to_dict(query_words)
+  temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size) --batch_size
+  model = torch.load('/home/user1/a4/lstm/model_char.net')
+  state_query = {data=transfer_data(temp)}
+  reset_state(state_query)
+  g_disable_dropout(model.rnns)
+  g_replace_table(model.s[0], model.start_s)
+  if query_len <= #query_words then 
+    print(table.concat(query_words, " "))
+  else
+    for i =1, (query_len-1) do
+      if i<#query_words then
+        y = state_query.data[i+1]
+      else
+        y = state_query.data[#query_words]
       end
-      print(table.concat(query_words, " "))
+      x = state_query.data[i]
+      s = model.s[i - 1]
+      _, model.s[1], query_pred = unpack(model.rnns[1]:forward({x, y, model.s[0]}))
+      g_replace_table(model.s[0], model.s[1])
+      if (i+1) > #query_words then
+        local _,max_index = torch.max(query_pred[1],1)
+        table.insert(query_words, rev_dict[max_index[1]])
+        temp = comm.input_to_dict(query_words)
+        temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size)
+        state_query = {data=transfer_data(temp)}
+      end
     end
+    print(table.concat(query_words, " "))
   end
 end
 
 function submission()
   g_init_gpu(arg_gpu)
   state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
-  model = {}
-  setup()
+  model = torch.load('/home/tw991/a4/lstm/model_char_large_1d.net')
   rev_dict = ptb.table_invert(ptb.vocab_map)
   print("OK GO")
   io.flush()
-  g_replace_table(model.s[0], model.start_s)
   while true do
     query_words = comm.getinput_submission()
     if #query_words == 0 then break end
@@ -279,10 +274,10 @@ function submission()
     state_query = {data=transfer_data(temp)}
     reset_state(state_query)
     g_disable_dropout(model.rnns)
+    g_replace_table(model.s[0], model.start_s)
     x = state_query.data[1]
     y = state_query.data[1]
-    _, model.s[1], query_pred = unpack(model.rnns[1]:forward({x, y, model.s[0]}))
-    g_replace_table(model.s[0], model.s[1])
+    _, _, query_pred = unpack(model.rnns[1]:forward({x, y, model.s[0]}))
     pred_sub = torch.totable(query_pred[1]:float())
     print(table.concat(pred_sub, " "))
     io.flush()
