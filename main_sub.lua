@@ -27,7 +27,6 @@ comm = require('a4_communication_loop_char')
 arg_gpu = {3}
 
 -- Train 1 day and gives 82 perplexity.
---[[]
 params = {batch_size=100,
                 seq_length=50,
                 layers=2,
@@ -40,22 +39,21 @@ params = {batch_size=100,
                 max_epoch=14,
                 max_max_epoch=55,
                 max_grad_norm=10}
-]]--
 -- Trains 1h and gives test 115 perplexity.
-
-params = {batch_size=300,
+--[[
+params = {batch_size=100,
                 seq_length=50,
                 layers=2,
-                decay=2,
-                rnn_size=200,
+                decay=1.15,
+                rnn_size=500,
                 dropout=0,
                 init_weight=0.1,
                 lr=1,
                 vocab_size=50,
                 max_epoch=4,
-                max_max_epoch=13,
+                max_max_epoch=20,
                 max_grad_norm=5}
-
+--]]
 function transfer_data(x)
   return x:cuda()
 end
@@ -111,7 +109,7 @@ end
 
 function setup()
   print("Creating a RNN LSTM network.")
-  local core_network = create_network()
+  local core_network = torch.load('/home/user1/a4/lstm/core.net')
   paramx, paramdx = core_network:getParameters()
   model.s = {}
   model.ds = {}
@@ -225,12 +223,13 @@ function query_sentences()
   state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
   -- query_len = 10
   -- query_words = {'new','york'}
+  model = {}
+  setup()
   query_len, query_words = comm.getinput()
   query_len = tonumber(query_len)
   rev_dict = ptb.table_invert(ptb.vocab_map)
   temp = comm.input_to_dict(query_words)
   temp = temp:resize(temp:size(1),1):expand(temp:size(1), params.batch_size) --batch_size
-  model = torch.load('/home/user1/a4/lstm/model_char.net')
   state_query = {data=transfer_data(temp)}
   reset_state(state_query)
   g_disable_dropout(model.rnns)
@@ -263,7 +262,8 @@ end
 function submission()
   g_init_gpu(arg_gpu)
   state_train = {data=transfer_data(ptb.traindataset(params.batch_size))}
-  model = torch.load('/home/user1/a4/lstm/model_char.net')
+  model = {}
+  setup()
   rev_dict = ptb.table_invert(ptb.vocab_map)
   print("OK GO")
   io.flush()
