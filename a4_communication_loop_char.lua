@@ -39,6 +39,7 @@ end
 function readline_submission()
   local line = io.read("*line")
   if line == nil then error({code="EOF"}) end
+  if line == ' ' then line = '_' end
   line = line:lower()
   line = stringx.split(line)
   for i = 1,#line do
