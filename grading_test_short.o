@@ -1,0 +1,23 @@
+tw991
+/scratch/ts2387/a4/tw991
+Flushing proc output until OK GO received
+ --  warning: fbcunn not found. Falling back to cunn
+ --  Using 1-th gpu
+ --  Creating a RNN LSTM network.
+ --  OK GO
+Start test loop
+0	Perplexity: 8.967955	avgnll: 0.391725	fails: 0
+1000	Perplexity: 527.646101	avgnll: 1.119362	fails: 0
+2000	Perplexity: 493.852981	avgnll: 1.107542	fails: 0
+3000	Perplexity: 635.736908	avgnll: 1.152640	fails: 0
+4000	Perplexity: 595.026543	avgnll: 1.140823	fails: 0
+5000	Perplexity: 648.776690	avgnll: 1.156266	fails: 0
+6000	Perplexity: 645.149343	avgnll: 1.155265	fails: 0
+7000	Perplexity: 622.733658	avgnll: 1.148950	fails: 0
+8000	Perplexity: 510.975869	avgnll: 1.113629	fails: 0
+9000	Perplexity: 451.147917	avgnll: 1.091392	fails: 0
+luajit: main_sub.lua:276: attempt to get length of global 'query_words' (a nil value)
+stack traceback:
+	main_sub.lua:276: in function 'submission'
+	main_sub.lua:356: in main chunk
+	[C]: at 0x00405150

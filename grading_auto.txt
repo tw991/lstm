@@ -1,0 +1,12 @@
+Generated char level test data? (would be a grave error)
+
+cd tw991; git log --pretty=format:"%an, %ad : %s" -4
+Tian Wang, Mon Apr 27 16:35:37 2015 -0400 : fix stdin by changing th to luajit
+=, Mon Apr 27 16:29:38 2015 -0400 : handle space
+=, Mon Apr 27 16:11:05 2015 -0400 : change handin
+=, Mon Apr 27 16:06:04 2015 -0400 : submission
+
+cd tw991; git log --pretty=format:"%ad" -1
+Mon Apr 27 16:35:37 2015 -0400
+
+Last commit is in time
